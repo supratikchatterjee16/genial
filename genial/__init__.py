@@ -3,6 +3,8 @@ import argparse
 import logging
 
 from genial.chat import serve_chat
+from genial.asr import serve_asr
+from genial.tts import serve_tts
 
 # initiate logger
 logger = logging.getLogger()
@@ -27,10 +29,23 @@ def run():
     subparser = primary_parser.add_subparsers(title="commands", dest="command")
 
     chat_subparser = subparser.add_parser("chat", help="Starts a chat agent in a CLI unless mentioned otherwise")
-    stt_subparser = subparser.add_parser("stt", help="Starts the Speech-to-text engine[planned]")
-    tts_subparser = subparser.add_parser("tts", help="Starts the Text-to-speech engine[planned]")
+    stt_subparser = subparser.add_parser("asr", help="Starts the Automatic Speech Recognition engine")
+    tts_subparser = subparser.add_parser("tts", help="Starts the Text-to-speech engine")
+    server_subparser = subparser.add_parser("server", help="Start the dirstributed server.")
+
+    
+
+    tts_subparser.add_argument("-f", "--file", help="Filepath to voice recording", type=str, nargs=1, required=True)
 
     args = primary_parser.parse_args()
 
-    if args.command == 'load':
+    if args.command == 'chat':
         serve_chat()
+    elif args.command == 'asr':
+        serve_asr()
+    elif args.command == 'tts':
+        serve_tts()
+    elif args.command == 'server':
+        pass
+    else :
+        primary_parser.print_help()

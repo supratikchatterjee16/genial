@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from datasets import load_dataset
+
 from transformers.utils import logging
 
 logging.get_logger("transformers").setLevel(logging.ERROR)
@@ -25,12 +26,12 @@ class ASRAgent:
                 torch_dtype=torch_dtype,
                 device=device,
             )
-    def process(self, file):
-        return self.pipe(file)
+    def process(self, file) -> str:
+        return self.pipe(file)['text']
 
 def serve_asr(file):
-    agent = ASRAgent()
-    agent.process(file)
+    agent = ASRAgent("openai/whisper-large-v3")
+    print(agent.process(file))
 
 if __name__ == "__main__":
     dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
