@@ -5,42 +5,46 @@ from transformers.utils import logging
 
 logging.get_logger("transformers").setLevel(logging.ERROR)
 
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-model_id = "openai/whisper-large-v3"
+class ASRAgent:
+    def __init__(self, model_name):
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+        self.model = AutoModelForSpeechSeq2Seq.from_pretrained(model_name, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True)
+        self.model.to(device)
+        self.processor = AutoProcessor.from_pretrained(model_name)
+        self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=self.model,
+                tokenizer=self.processor.tokenizer,
+                feature_extractor=self.processor.feature_extractor,
+                max_new_tokens=128,
+                chunk_length_s=30,
+                batch_size=16,
+                return_timestamps=True,
+                torch_dtype=torch_dtype,
+                device=device,
+            )
+    def process(self, file):
+        return self.pipe(file)
 
-model = AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
-)
-model.to(device)
+def serve_asr(file):
+    agent = ASRAgent()
+    agent.process(file)
 
-processor = AutoProcessor.from_pretrained(model_id)
+if __name__ == "__main__":
+    dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
+    sample = dataset[0]["audio"]
+    serve_asr(sample)
 
-pipe = pipeline(
-    "automatic-speech-recognition",
-    model=model,
-    tokenizer=processor.tokenizer,
-    feature_extractor=processor.feature_extractor,
-    max_new_tokens=128,
-    chunk_length_s=30,
-    batch_size=16,
-    return_timestamps=True,
-    torch_dtype=torch_dtype,
-    device=device,
-)
+# result = pipe(sample)
+# print(result["text"])
 
-dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
-sample = dataset[0]["audio"]
+# result = pipe("/home/supratik/Downloads/audio.wav")
+# print(result["text"])
 
-result = pipe(sample)
-print(result["text"])
-
-result = pipe("/home/supratik/Downloads/audio.wav")
-print(result["text"])
-
-result = pipe("/home/supratik/Downloads/sample1.flac")
-print(result["text"])
+# result = pipe("/home/supratik/Downloads/sample1.flac")
+# print(result["text"])
 
 # import torch
 # import pyaudio

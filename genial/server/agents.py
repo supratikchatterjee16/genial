@@ -52,10 +52,19 @@ class SSEAgent:
 
 class AgentStore:
     def __init__(self):
+        hostname = socket.getfqdn()
+        self._address = socket.gethostbyname_ex(hostname)[2][1]
+        self._chat_agents = {}
+        self._tts_agents = {}
+        self._asr_agents = {}
+        self._sse_agents = {}
+
+    def get_chat_agent(self, agent_id : str):
         pass
 
-    def add_agent(agent, collection : str | None =None):
+    def add_chat_agent(self):
         pass
+
 # A sample HTML page that works with the code above :
 # <!DOCTYPE html>
 # <html>

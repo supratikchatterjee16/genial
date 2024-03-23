@@ -12,9 +12,9 @@ logging.get_logger("transformers").setLevel(logging.ERROR)
 # model_name = "microsoft/DialoGPT-large"
 # model_name = "microsoft/DialoGPT-medium"
 # model_name = "microsoft/DialoGPT-small"
-# model_name = "HuggingFaceH4/zephyr-7b-beta"
+# model_name = "HuggingFaceH4/zephyr-7b-beta" # Needs more RAM
 # model_name = 'meta-llama/Llama-2-70b-chat-hf' # Requires authorization token
-# model_name = "deepset/roberta-base-squad2"
+# model_name = "deepset/roberta-base-squad2" # For QA only
 
 token = None
 
@@ -79,7 +79,7 @@ class ConversationalAgent:
                 temperature=0.75,
                 top_k = 25,
                 epsilon_cutoff=0.5,
-                length_penalty=0.8,
+                length_penalty=0.2,
                 num_beams=4,
                 remove_invalid_values = True,
                 early_stopping= True,
